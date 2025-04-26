@@ -1,0 +1,38 @@
+name: Release and Update Lambda Reference
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., v1.0.1)'
+        required: true
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 1. Create a new tag and GitHub release
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Update lambda_zip_path in terragrunt.hcl
+      - name: Update lambda_zip_path
+        run: |
+          sed -i 's|lambda_zip_path.*|lambda_zip_path      = "https://github.com/wapmesquita/confluence-aws-agent/releases/download/${{ github.event.inputs.release_tag }}/src.zip"|' example/terragrunt/slack_bot/terragrunt.hcl
+
+      # 3. Commit and push the change
+      - name: Commit and push updated reference
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add example/terragrunt/slack_bot/terragrunt.hcl
+          git commit -m "Update lambda_zip_path for release ${{ github.event.inputs.release_tag }}"
+          git push

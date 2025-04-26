@@ -1,0 +1,5 @@
+.gen/
+.terraform/
+.terraform.lock.hcl
+.terragrunt-cache
+slack_bot/src.zip

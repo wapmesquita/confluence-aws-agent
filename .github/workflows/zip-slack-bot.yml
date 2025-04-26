@@ -1,0 +1,30 @@
+name: Zip Slack Bot Source and Attach to Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-and-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Zip slack_bot/src directory
+        run: |
+          cd slack_bot/src
+          pip install --target=./python/lib/python3.11/site-packages -r requirements.txt
+          zip -r ../src.zip .
+
+      - name: Upload zip to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: slack_bot/src.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
