@@ -5,6 +5,10 @@ locals {
 }
 
 terraform {
+  before_hook "download_lambda_zip" {
+    commands = ["init", "plan", "apply"]
+    execute  = ["bash", "${get_terragrunt_dir()}/download_lambda_zip.sh"]
+  }
   source = "git::https://github.com/wapmesquita/confluence-aws-agent.git//slack_bot/infra"
 }
 
@@ -23,5 +27,5 @@ inputs = {
   slack_bot_token      = "xoxb-mock-bot-token"
   slack_signing_secret = "mock-signing-secret"
   agent_api_url        = dependency.agent.outputs.knowledge_base_arn
-  lambda_zip_path      = "https://github.com/wapmesquita/confluence-aws-agent/releases/download/v1.0.0/src.zip"
+  lambda_zip_path      = "src.zip"
 }
