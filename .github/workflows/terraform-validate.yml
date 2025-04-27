@@ -3,7 +3,7 @@ name: Terraform Validate
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   terraform-validate:
